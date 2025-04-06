@@ -38,15 +38,16 @@ from math import sqrt
 class CNN(nn.Module):
     def __init__(self):
         #Define layers of CNN
-        super.__init__()
+        super().__init__()
+        self.kernel_size = 5
         self.conv1 = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=5, stride=1, padding=2)
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
         self.conv2 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=5, stride=1, padding=2)
-        self.norm = nn.BatchNorm1d(num_features = 64)
+        self.norm = nn.BatchNorm2d(num_features = 64)
         self.conv3 = nn.Conv2d(in_channels = 64, out_channels = 64, kernel_size=5, stride=1, padding=2)
-        self.fc1 = nn.Linear(in_features = 64 * 2 * 2, out_features = 500)
+        self.fc1 = nn.Linear(in_features = 4096, out_features = 500)
         self.dropout = nn.Dropout(p=0.5)
-        self.fc2 = nn.Linear(in_features = 500, out_features = 17)
+        self.fc2 = nn.Linear(in_features = 500, out_features = 22)
 
         self.set_weights()
     
@@ -54,35 +55,48 @@ class CNN(nn.Module):
         #Initialize weights using normal and He initialization
         for conv in [self.conv1, self.conv2, self.conv3]:
             nn.init.normal_(conv.weight, mean = 0, std = sqrt(2 / ((self.kernel_size**2) * conv.in_channels)))
-            nn.init.constant_(conv.bias, 1.0)
+            nn.init.constant_(conv.bias, float(1.0))
             pass
         for fc in [self.fc1, self.fc2]:
             nn.init.kaiming_normal_(fc.weight, mode="fan_in")
-            nn.init.constant_(fc.bias, 0.0)
+            nn.init.constant_(fc.bias, float(0.0))
+            pass
     
     def forward(self, x):
         #Convolutional layer 1
+        #print(x.shape)
         x = func.relu(self.conv1(x))
+        #print(x.shape)
         #Max Pooling layer
         x = self.pool(x)
+        #print(x.shape)
 
         #Convolutional Layer 2
         x = func.relu(self.conv2(x))
+        #print(x.shape)
         #Max Pooling and BatchNorm layer
         x = self.pool(x)
+        #print(x.shape)
         x = self.norm(x)
+        #print(x.shape)
 
         #Convolutional layer 3
         x = func.relu(self.conv3(x))
+        #print(x.shape)
 
         x = self.pool(x)
+        #print(x.shape)
         x = self.norm(x)
+        #print(x.shape, 1)
 
         #Reshape for both fully connected layers
-        x = x.reshape(-1, 64 * 2 * 2)
+        x = torch.flatten(x, 1)
+        #print(x.shape, 1)
         x = func.relu(self.fc1(x))
+        #print(x.shape)
 
         x = self.dropout(x)
 
         x = self.fc2(x)
+        return x
     

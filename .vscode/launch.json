@@ -8,7 +8,7 @@
             "name": "Python Debugger: Current File",
             "type": "debugpy",
             "request": "launch",
-            "program": "im_dataset.py",
+            "program": "train.py",
             "console": "integratedTerminal"
         }
     ]

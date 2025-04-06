@@ -66,14 +66,14 @@ def get_datasets(**kwargs):
 
     return train, val, test, standardizer
 
-def get_loaders(batch_size, **kwargs):
-    train, val, test = get_datasets(**kwargs)
+def get_loaders_and_datasets(batch_size, **kwargs):
+    train, val, test, _ = get_datasets(**kwargs)
 
     train_loader = DataLoader(train, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(val, batch_size=batch_size, shuffle=False)
     test_loader = DataLoader(test, batch_size=batch_size, shuffle=False)
 
-    return train_loader, val_loader, test_loader
+    return train_loader, val_loader, test_loader, train, val, test
 
 class Standardize(object):
     
